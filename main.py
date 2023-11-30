@@ -59,7 +59,7 @@ def print_keys_in_nests():
                     selected_key = keys[index]
                     print(f"\nSelected key: {selected_key}")
                     print_parts(selected_key)
-                    automate_typing(selected_key)
+                    # automate_typing(selected_key)
                 else:
                     print("Invalid selection.")
             except ValueError:
@@ -71,23 +71,34 @@ def print_keys_in_nests():
 
 def print_parts(selected_key):
     try:
-        parts_ref = db.reference(f"/nests/{selected_key}/printablePartsList")
+        parts_ref = db.reference(f"/nests/{selected_key}/parts")
         parts_data = parts_ref.get()
         hull_ref = db.reference(f"/nests/{selected_key}/")
         hull_data = hull_ref.get()
 
         if parts_data:
-            print(f"\nParts under /nests/{selected_key}/printablePartsList:")
-            for part in parts_data:
-                print(f"name: {part}, hull: {hull_data.get('hull', '')}")
+            print(f"\nParts under /nests/{selected_key}/parts:")
+            for i, part in enumerate(parts_data):
+                print(f" ({i + 1}) name: {part['name']}, hull: {hull_data.get('hull', '')}")
+            
+            choose_print_method = input("Would you like to print all parts in nest? Y/N ")
+            if choose_print_method == "y":
+                automate_typing(selected_key)
+            if choose_print_method == "n":
+                print_start_selection = input("Select key you want to start from: ")
+                print_end_selection = input("Select key you want to end on: ")
+                filtered_array = (parts_data[int(print_start_selection) - 1 : int(print_end_selection) ])
+                auto_typing_range(filtered_array, hull_data.get('hull', ''))
+
+            
         else:
-            print(f"No data found in /nests/{selected_key}/printablePartsList")
+            print(f"No data found in /nests/{selected_key}/parts")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 
 def automate_typing(selected_key):
     try:
-        parts_ref = db.reference(f"/nests/{selected_key}/printablePartsList")
+        parts_ref = db.reference(f"/nests/{selected_key}/parts")
         parts_data = parts_ref.get()
         hull_ref = db.reference(f"/nests/{selected_key}/")
         hull_data = hull_ref.get()
@@ -97,26 +108,84 @@ def automate_typing(selected_key):
             time.sleep(5)  # Adjust the sleep duration if needed
             for part in parts_data:
                 hull_value = hull_data.get('hull', '')
-                # name_value = part.get('')
-                concatenated_string = f"{hull_value}/{part}"
+                name_value = part.get('name', '')
+                qty_value = part.get('qty', '')
+                
+                if name_value[3] == ' ':
+                    bt = (name_value[0:3])
 
-                pyautogui.typewrite(concatenated_string)
-                # time.sleep(0.5)  # Adjust the sleep duration if needed
-                pyautogui.press('enter')
-                time.sleep(0.5)  # Adjust the sleep duration if needed
+                    concatenated_string = f"{hull_value}/{bt}"
+                    pyautogui.typewrite(concatenated_string)
+                    pyautogui.press('enter')
+                    pyautogui.typewrite(f"{qty_value}")
+                    pyautogui.press('enter')
+
+                    time.sleep(11)  
+                    pyautogui.press('enter')
+                    time.sleep(1)
+                    pyautogui.press('enter')
+                else:
+
+                    concatenated_string = f"{hull_value}/{name_value}"
+                    pyautogui.typewrite(concatenated_string)
+                    pyautogui.press('enter')
+                    pyautogui.typewrite(f"{qty_value}")
+                    pyautogui.press('enter')
+
+                    time.sleep(11)  
+                    pyautogui.press('enter')
+                    time.sleep(1)
+                    pyautogui.press('enter')
 
             # Press Enter at the end
             pyautogui.press('enter')
             print("Automation complete!")
         else:
-            print(f"No data found in /nests/{selected_key}/printablePartsList")
+            print(f"No data found in /nests/{selected_key}/parts")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
+
+def auto_typing_range(items, hull):
+    try:
+        time.sleep(5)
+        for parts in items:
+            part_name = parts['name']
+            if part_name[3] == ' ':
+                bt = (part_name[0:3])
+
+                concatenated_string = f"{hull}/{bt}"
+                pyautogui.typewrite(concatenated_string)
+                pyautogui.press('enter')
+                pyautogui.typewrite(f"{parts['qty']}")
+                pyautogui.press('enter')
+
+                time.sleep(11)  
+                pyautogui.press('enter')
+                time.sleep(1)
+                pyautogui.press('enter')
+            else:
+
+                concatenated_string = f"{hull}/{part_name}"
+                pyautogui.typewrite(concatenated_string)
+                pyautogui.press('enter')
+                pyautogui.typewrite(f"{parts['qty']}")
+                pyautogui.press('enter')
+
+                time.sleep(11)  
+                pyautogui.press('enter')
+                time.sleep(1)
+                pyautogui.press('enter')
+
+            # Press Enter at the end
+        pyautogui.press('enter')
+        print("Automation complete!")
+    except Exception as e:
+        print(f"an error has occurred")
 
 if __name__ == "__main__":
     # email = input("Enter your email: ")
     # password = input("Enter your password: ")
-    email = "jenifer.hodge@us.fincantieri.com"
-    password = "123456789"
+    email = "miguel.charry@us.fincantieri.com"
+    password = "Catherine73#"
 
     login_with_email_and_password(email, password)
